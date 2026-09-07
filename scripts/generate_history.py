@@ -80,6 +80,6 @@ if __name__ == "__main__":
     OUT.write_text(json.dumps(data, indent=2, ensure_ascii=False), encoding="utf-8")
     amounts = [c["amount_claimed"] for c in data]
     from statistics import mean, pstdev
-    print(f"✅ {len(data)} claims sintéticos -> {OUT}")
+    print(f"{len(data)} claims sintéticos -> {OUT}")
     print(f"   monto: media ${mean(amounts):,.0f} · desv ${pstdev(amounts):,.0f}")
     print(f"   'Patricia Vance' aparece {sum(1 for c in data if c['beneficiary_name']=='Patricia Vance')} veces")

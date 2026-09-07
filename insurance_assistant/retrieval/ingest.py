@@ -50,4 +50,4 @@ def ingest(reset: bool = True) -> int:
 
 if __name__ == "__main__":
     n = ingest()
-    print(f"✅ Ingesta completa: {n} chunks indexados en ChromaDB.")
+    print(f"Ingesta completa: {n} chunks indexados en ChromaDB.")

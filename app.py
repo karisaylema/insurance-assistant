@@ -13,22 +13,21 @@ from insurance_assistant.retrieval.ingest import ingest
 from insurance_assistant.retrieval.vectorstore import is_ingested
 from insurance_assistant.settings import settings
 
-st.set_page_config(page_title="Principal Life — Asistente de Claims", page_icon="🛡️", layout="wide")
+st.set_page_config(page_title="Principal Life — Asistente de Claims", layout="wide")
 
-SEV_COLOR = {"low": "🟢", "medium": "🟡", "high": "🟠", "critical": "🔴"}
 DECISION_LABEL = {
-    "auto_approve": "✅ Auto-aprobar",
-    "manual_review": "🟡 Revisión humana",
-    "reject": "🔴 Rechazar",
+    "auto_approve": "Auto-aprobar",
+    "manual_review": "Revisión humana",
+    "reject": "Rechazar",
 }
 
 
 with st.sidebar:
-    st.header("🛡️ Principal Life")
+    st.header("Principal Life")
     st.caption(f"Póliza **{POLICY_FACTS['group_policy_number']}** · {POLICY_FACTS['policyholder']}")
     st.caption(f"Modelo: `{settings.model_label()}`")
     _mode_desc = {
-        "cached": " · póliza cacheada 🗄️",
+        "cached": " · póliza cacheada",
         "rag": " · retrieval",
         "hybrid": " · RAG + páginas completas",
     }
@@ -37,10 +36,10 @@ with st.sidebar:
     if settings.policy_mode in ("rag", "hybrid"):
         st.markdown(f"**ChromaDB** (`{settings.chroma_mode}`)")
         if is_ingested():
-            st.success("Póliza indexada ✔")
+            st.success("Póliza indexada")
         else:
             st.warning("Aún no indexada")
-        if st.button("📥 (Re)indexar póliza"):
+        if st.button("(Re)indexar póliza"):
             with st.spinner("Indexando póliza en ChromaDB..."):
                 n = ingest()
             st.success(f"{n} fragmentos indexados")
@@ -52,9 +51,9 @@ with st.sidebar:
 st.title("Asistente de Claims — Seguro de Vida")
 
 if settings.policy_mode in ("rag", "hybrid") and not is_ingested():
-    st.info("👈 Primero indexa la póliza con el botón del panel lateral.")
+    st.info("Primero indexa la póliza con el botón del panel lateral.")
 
-tab_chat, tab_claim = st.tabs(["💬 Preguntas sobre la póliza", "📄 Revisar un claim"])
+tab_chat, tab_claim = st.tabs(["Preguntas sobre la póliza", "Revisar un claim"])
 
 
 # --- TAB 1: Chatbot RAG/CAG (Opción 1) ---
@@ -80,7 +79,7 @@ with tab_chat:
             "usage": result.get("usage", {}),
         })
 
-    # Render: más reciente primero (cada intercambio: pregunta → respuesta).
+    # Render: más reciente primero (cada intercambio: pregunta -> respuesta).
     for ex in reversed(st.session_state.chat):
         with st.chat_message("user"):
             st.markdown(ex["question"])
@@ -89,14 +88,14 @@ with tab_chat:
             u = ex.get("usage", {})
             if u:
                 st.caption(
-                    f"🗄️ caché: {u.get('cache_read', 0):,} leídos · "
+                    f"Caché: {u.get('cache_read', 0):,} leídos · "
                     f"{u.get('cache_creation', 0):,} escritos · "
                     f"entrada {u.get('input_tokens', 0):,} · salida {u.get('output_tokens', 0):,} tok"
                 )
             if ex.get("sources"):
                 with st.expander("Fuentes"):
                     for s in ex["sources"]:
-                        st.caption(f"📄 {s['source']} · pág. {s['page']}")
+                        st.caption(f"{s['source']} · pág. {s['page']}")
 
 
 # --- TAB 2: Subir claim + fraude (Opción 1 validación + Opción 2 fraude) ---
@@ -106,7 +105,7 @@ with tab_claim:
 
     uploaded = st.file_uploader("Documento del claim", type=["pdf", "docx", "json", "txt"])
 
-    if uploaded and st.button("🔍 Analizar claim", type="primary"):
+    if uploaded and st.button("Analizar claim", type="primary"):
         with st.spinner("Extrayendo y evaluando el claim..."):
             text = read_document(uploaded.getvalue(), uploaded.name)
             st.session_state.assessment = review_claim(text, uploaded.name)
@@ -116,22 +115,22 @@ with tab_claim:
         c1, c2, c3 = st.columns(3)
         c1.metric("Decisión", DECISION_LABEL.get(assessment.decision, assessment.decision))
         c2.metric("Fraud score", assessment.fraud_score)
-        c3.metric("Riesgo", f"{SEV_COLOR.get(assessment.risk_level, '')} {assessment.risk_level}")
+        c3.metric("Riesgo", assessment.risk_level.upper())
 
-        st.markdown("#### 🧠 Explicación")
+        st.markdown("#### Explicación")
         st.info(assessment.explanation or "—")
 
         if assessment.flags:
-            st.markdown("#### 🚩 Flags de fraude")
+            st.markdown("#### Flags de fraude")
             for f in assessment.flags:
                 with st.container(border=True):
-                    st.markdown(f"**{SEV_COLOR.get(f.severity, '')} {f.rule}** — {f.detail}")
-                    st.caption(f"📖 Cláusula: {f.clause}")
+                    st.markdown(f"**[{f.severity.upper()}] {f.rule}** — {f.detail}")
+                    st.caption(f"Cláusula: {f.clause}")
         else:
             st.success("Sin flags de fraude.")
 
         if assessment.missing_fields:
-            st.markdown("#### ⚠️ Campos faltantes")
+            st.markdown("#### Campos faltantes")
             for m in assessment.missing_fields:
                 st.write(f"- {m.detail}")
 
