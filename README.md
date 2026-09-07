@@ -22,37 +22,61 @@ esta solución **cubre los tres**, con énfasis en 1 y 2:
 - **Orquestación con LangGraph**; el modelo **no decide** el fraude (lo deciden
   reglas), solo **lee** el documento y **explica** las alertas.
 
-## Cómo correr
+## Instalación y uso
+
+**Requisitos:** Python 3.10+. **No necesitas cuenta de ChromaDB** — corre en local
+(la primera vez descarga solo un modelo de embeddings de ~80 MB, sin credenciales).
+
+### 1) Instalar
 
 ```bash
-python -m venv .venv && source .venv/bin/activate
+git clone https://github.com/karisaylema/insurance-assistant.git
+cd insurance-assistant
+python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
-cp .env.example .env          # añade ANTHROPIC_API_KEY (o LLM_PROVIDER=ollama)
-
-streamlit run app.py          # abre la app (chat + revisar claim)
-pytest                        # tests de las reglas de fraude
 ```
 
-Notas:
-- Modelo configurable en `.env` (`ANTHROPIC_MODEL`, ej. `claude-sonnet-5`).
-- La póliza va **cacheada en el prompt** por defecto (`POLICY_MODE=cached`), así que
-  no requiere indexar. Para el modo `rag`/`hybrid`:
-  `python -m insurance_assistant.retrieval.ingest`.
-- El análisis histórico usa datos **sintéticos** (`data/history/`), regenerables con
+### 2) Añadir el PDF de la póliza (requerido, no incluido)
+
+Coloca un PDF de póliza de vida en `data/policy/` (ver [data/policy/README.md](data/policy/README.md)).
+El caso usó la muestra de **Principal Life — Group Policy GL S655**; los valores en
+`insurance_assistant/domain/policy.py` (`POLICY_FACTS`) están calibrados a esa póliza.
+
+### 3) Elegir el modelo — dos opciones
+
+```bash
+cp .env.example .env      # luego edita .env según la opción elegida
+```
+
+**Opción A — Claude API** (recomendada). Necesitas una API key de Anthropic:
+1. Entra a <https://console.anthropic.com> → **Settings → Billing** y agrega saldo (desde ~$5).
+2. **Settings → API Keys → Create Key**, copia la key (`sk-ant-...`).
+3. En `.env`: `LLM_PROVIDER=anthropic` y `ANTHROPIC_API_KEY=sk-ant-...`
+   (opcional `ANTHROPIC_MODEL=claude-sonnet-5` para abaratar).
+
+> La suscripción de Claude.ai (Pro/Max) **no** sirve para la API; la API se paga aparte.
+
+**Opción B — Ollama, local y gratis** (sin API key). Ideal si no tienes cuenta de Anthropic:
+1. Instala Ollama desde <https://ollama.com> y descarga un modelo: `ollama pull llama3.1`
+2. `pip install langchain-ollama`
+3. En `.env`: `LLM_PROVIDER=ollama`
+
+### 4) Ejecutar
+
+```bash
+streamlit run app.py      # abre la app (chat + revisar claim)
+pytest                    # tests de las reglas (no requieren modelo ni red)
+```
+
+### Notas para evaluadores
+- **ChromaDB**: local por defecto (`CHROMA_MODE=local`); no requiere cuenta ni credenciales.
+- **La detección de fraude no depende del modelo**: los flags y la decisión son código
+  determinístico. El modelo (opción A o B) se usa solo para el chatbot, la extracción de
+  documentos y para **redactar** la explicación de las alertas.
+- La póliza va **cacheada en el prompt** por defecto (`POLICY_MODE=cached`), así que no
+  requiere indexar. Para `rag`/`hybrid`: `python -m insurance_assistant.retrieval.ingest`.
+- El histórico usa datos **sintéticos** incluidos (`data/history/`), regenerables con
   `python -m scripts.generate_history`.
-
-## Archivos requeridos (no incluidos en el repo)
-
-Por privacidad/licencia, dos archivos **no** se versionan y hay que añadirlos:
-
-| Archivo | Para qué | Cómo obtenerlo |
-|---|---|---|
-| `data/policy/*.pdf` | La póliza que el asistente lee/indexa | Coloca el PDF de la póliza (ver [data/policy/README.md](data/policy/README.md)). El caso usó la muestra de Principal Life **GL S655**; `POLICY_FACTS` está calibrado a ella. |
-| `.env` | Credenciales y configuración | `cp .env.example .env` y añade tu `ANTHROPIC_API_KEY` |
-
-Sin el PDF de la póliza, el chatbot no tiene contexto y la ingesta falla. Los datos
-del histórico (`data/history/`) y los claims de ejemplo (`data/claims/`) **sí** están
-incluidos (son sintéticos).
 
 ## Claims de ejemplo (demo)
 
