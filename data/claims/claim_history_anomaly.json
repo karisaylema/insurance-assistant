@@ -1,0 +1,17 @@
+{
+  "claim_id": "CLM-2024-0088",
+  "policy_number": "S655",
+  "member_name": "Walter Reese",
+  "member_age": 54,
+  "coverage_type": "life",
+  "date_of_death": "2024-05-10",
+  "date_filed": "2024-06-02",
+  "cause_of_death": "Traffic accident",
+  "beneficiary_name": "Patricia Vance",
+  "beneficiary_relationship": "spouse",
+  "amount_claimed": 75000,
+  "physician_name": "Dr. Alan Pierce",
+  "physician_relationship": "none",
+  "beneficiary_charged_in_death": false,
+  "proof_of_loss_attached": true
+}

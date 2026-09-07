@@ -1,0 +1,21 @@
+# Secretos / entorno
+.env
+
+# Entorno virtual
+.venv/
+venv/
+
+# Chroma local
+.chroma/
+
+# PDF de la póliza (no se distribuye — ver data/policy/README.md)
+data/policy/*.pdf
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# OS
+.DS_Store

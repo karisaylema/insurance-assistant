@@ -1,0 +1,24 @@
+# --- Orquestación (agente) ---
+langgraph>=0.2.0
+langchain-core>=0.3.0
+langchain-anthropic>=0.2.0        # wrapper de Claude para LangGraph
+# langchain-ollama>=0.2.0         # descomenta si usas modelo local
+
+# --- LLM oficial (usado por el wrapper y disponible directo) ---
+anthropic>=0.40.0
+
+# --- RAG / vector store ---
+chromadb>=0.5.0
+langchain-text-splitters>=0.3.0
+
+# --- Procesamiento de documentos ---
+pypdf>=5.0.0
+python-docx>=1.1.0
+
+# --- Datos / validación / config ---
+pydantic>=2.7.0
+pydantic-settings>=2.4.0
+
+# --- Front ---
+streamlit>=1.38.0
+python-dotenv>=1.0.0

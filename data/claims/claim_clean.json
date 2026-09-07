@@ -1,0 +1,17 @@
+{
+  "claim_id": "CLM-2024-0011",
+  "policy_number": "S655",
+  "member_name": "Robert Miller",
+  "member_age": 58,
+  "coverage_type": "life",
+  "date_of_death": "2024-03-12",
+  "date_filed": "2024-04-05",
+  "cause_of_death": "Myocardial infarction",
+  "beneficiary_name": "Sarah Mitchell",
+  "beneficiary_relationship": "spouse",
+  "amount_claimed": 10000,
+  "physician_name": "Dr. Alan Pierce",
+  "physician_relationship": "none",
+  "beneficiary_charged_in_death": false,
+  "proof_of_loss_attached": true
+}

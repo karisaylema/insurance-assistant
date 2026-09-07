@@ -1,0 +1,12 @@
+[project]
+name = "insurance-assistant"
+version = "0.1.0"
+description = "Asistente de claims de seguro de vida (chatbot + detección de fraude)"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
+
+[tool.setuptools]
+packages = ["insurance_assistant"]

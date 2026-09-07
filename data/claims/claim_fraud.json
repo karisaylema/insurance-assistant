@@ -1,0 +1,17 @@
+{
+  "claim_id": "CLM-2024-0042",
+  "policy_number": "S655",
+  "member_name": "George Dawson",
+  "member_age": 76,
+  "coverage_type": "life",
+  "date_of_death": "2024-06-01",
+  "date_filed": "2024-11-01",
+  "cause_of_death": "Accidental fall",
+  "beneficiary_name": "Mark Dawson",
+  "beneficiary_relationship": "son",
+  "amount_claimed": 10000,
+  "physician_name": "Dr. Mark Dawson",
+  "physician_relationship": "son",
+  "beneficiary_charged_in_death": true,
+  "proof_of_loss_attached": true
+}

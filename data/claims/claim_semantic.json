@@ -1,0 +1,18 @@
+{
+  "claim_id": "CLM-2024-0099",
+  "policy_number": "S655",
+  "member_name": "Thomas Blake",
+  "member_age": 60,
+  "coverage_type": "life",
+  "date_of_death": "2024-04-18",
+  "date_filed": "2024-05-10",
+  "cause_of_death": "Accidental fall",
+  "narrative": "During the evening the policyholder slipped and tumbled down the staircase at his residence and was rushed to the hospital, where he passed away from the injuries he sustained.",
+  "beneficiary_name": "Helen Blake",
+  "beneficiary_relationship": "spouse",
+  "amount_claimed": 10000,
+  "physician_name": "Dr. Alan Pierce",
+  "physician_relationship": "none",
+  "beneficiary_charged_in_death": false,
+  "proof_of_loss_attached": true
+}
