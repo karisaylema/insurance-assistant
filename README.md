@@ -1,33 +1,33 @@
-# Asistente de Claims — Principal Life Insurance
+# Claims Assistant — Principal Life Insurance
 
-Chatbot con IA para seguros de vida, construido sobre una **póliza real**
-(Principal Life, Group Policy GL S655). El enunciado permite combinar sus focos;
-esta solución **cubre los tres**, con énfasis en 1 y 2:
+AI chatbot for life insurance, built on a **real policy document**
+(Principal Life, Group Policy GL S655). The brief allows combining its focus
+areas; this solution **covers all three**, with emphasis on 1 and 2:
 
-| Opción | Foco | Cómo se cubre |
+| Option | Focus | How it's covered |
 |---|---|---|
-| **1** | Claims Processor | Extrae datos de claims subidos (PDF/DOCX/JSON), valida y marca faltantes |
-| **2** | Fraud Detection | Detecta fraude en 3 capas y **explica** cada alerta citando la fuente |
-| **3** | Policy Manager | Chatbot que responde sobre términos, cobertura y exclusiones |
+| **1** | Claims Processor | Extracts data from uploaded claims (PDF/DOCX/JSON), validates and flags missing fields |
+| **2** | Fraud Detection | Detects fraud across 3 layers and **explains** each alert citing its source |
+| **3** | Policy Manager | Chatbot that answers questions about terms, coverage and exclusions |
 
-## Características
+## Features
 
-- **Chatbot RAG/CAG** sobre la póliza, con citas de página y respuesta "no lo
-  encuentro en la póliza" (anti-alucinación).
-- **Procesamiento de claims**: extracción a esquema tipado (Pydantic) + validación.
-- **Detección de fraude en 3 capas**, todas explicables:
-  1. **Reglas de póliza** (código determinístico anclado a cláusulas reales).
-  2. **Análisis histórico** (estadística: duplicados, frecuencia, z-score).
-  3. **Análisis semántico** (embeddings: narrativas similares).
-- **Orquestación con LangGraph**; el modelo **no decide** el fraude (lo deciden
-  reglas), solo **lee** el documento y **explica** las alertas.
+- **RAG/CAG chatbot** over the policy, with page citations and an "I can't find
+  this in the policy" fallback (anti-hallucination).
+- **Claim processing**: extraction into a typed schema (Pydantic) + validation.
+- **3-layer fraud detection**, all explainable:
+  1. **Policy rules** (deterministic code anchored to real clauses).
+  2. **Historical analysis** (statistics: duplicates, frequency, z-score).
+  3. **Semantic analysis** (embeddings: similar narratives).
+- **Orchestrated with LangGraph**; the model **never decides** whether something
+  is fraud (rules do), it only **reads** the document and **explains** the alerts.
 
-## Instalación y uso
+## Installation and usage
 
-**Requisitos:** Python 3.10+. **No necesitas cuenta de ChromaDB** — corre en local
-(la primera vez descarga solo un modelo de embeddings de ~80 MB, sin credenciales).
+**Requirements:** Python 3.10+. **No ChromaDB account needed** — it runs locally
+(the first run only downloads an ~80 MB embedding model, no credentials required).
 
-### 1) Instalar
+### 1) Install
 
 ```bash
 git clone https://github.com/karisaylema/insurance-assistant.git
@@ -36,115 +36,115 @@ python -m venv .venv && source .venv/bin/activate   # Windows: .venv\Scripts\act
 pip install -r requirements.txt
 ```
 
-### 2) Añadir el PDF de la póliza (requerido, no incluido)
+### 2) Add the policy PDF (required, not included)
 
-Coloca un PDF de póliza de vida en `data/policy/` (ver [data/policy/README.md](data/policy/README.md)).
-El caso usó la muestra de **Principal Life — Group Policy GL S655**; los valores en
-`insurance_assistant/domain/policy.py` (`POLICY_FACTS`) están calibrados a esa póliza.
+Place a life insurance policy PDF in `data/policy/` (see [data/policy/README.md](data/policy/README.md)).
+This case used the **Principal Life — Group Policy GL S655** sample; the values in
+`insurance_assistant/domain/policy.py` (`POLICY_FACTS`) are calibrated to that policy.
 
-### 3) Elegir el modelo — dos opciones
+### 3) Choose a model — two options
 
 ```bash
-cp .env.example .env      # luego edita .env según la opción elegida
+cp .env.example .env      # then edit .env based on the option you pick
 ```
 
-**Opción A — Claude API** (recomendada). Necesitas una API key de Anthropic:
-1. Entra a <https://console.anthropic.com> → **Settings → Billing** y agrega saldo (desde ~$5).
-2. **Settings → API Keys → Create Key**, copia la key (`sk-ant-...`).
-3. En `.env`: `LLM_PROVIDER=anthropic` y `ANTHROPIC_API_KEY=sk-ant-...`
-   (opcional `ANTHROPIC_MODEL=claude-sonnet-5` para abaratar).
+**Option A — Claude API** (recommended). You'll need an Anthropic API key:
+1. Go to <https://console.anthropic.com> → **Settings → Billing** and add credit (from ~$5).
+2. **Settings → API Keys → Create Key**, copy the key (`sk-ant-...`).
+3. In `.env`: `LLM_PROVIDER=anthropic` and `ANTHROPIC_API_KEY=sk-ant-...`
+   (optionally `ANTHROPIC_MODEL=claude-sonnet-5` to reduce cost).
 
-> La suscripción de Claude.ai (Pro/Max) **no** sirve para la API; la API se paga aparte.
+> A Claude.ai subscription (Pro/Max) does **not** grant API access; the API is billed separately.
 
-**Opción B — Ollama, local y gratis** (sin API key). Ideal si no tienes cuenta de Anthropic:
-1. Instala Ollama desde <https://ollama.com> y descarga un modelo: `ollama pull llama3.1`
+**Option B — Ollama, local and free** (no API key). Ideal if you don't have an Anthropic account:
+1. Install Ollama from <https://ollama.com> and pull a model: `ollama pull llama3.1`
 2. `pip install langchain-ollama`
-3. En `.env`: `LLM_PROVIDER=ollama`
+3. In `.env`: `LLM_PROVIDER=ollama`
 
-### 4) Ejecutar
+### 4) Run
 
 ```bash
-streamlit run app.py      # abre la app (chat + revisar claim)
-pytest                    # tests de las reglas (no requieren modelo ni red)
+streamlit run app.py      # opens the app (chat + claim review)
+pytest                    # rule tests (no model or network required)
 ```
 
-### Notas para evaluadores
-- **ChromaDB**: local por defecto (`CHROMA_MODE=local`); no requiere cuenta ni credenciales.
-- **La detección de fraude no depende del modelo**: los flags y la decisión son código
-  determinístico. El modelo (opción A o B) se usa solo para el chatbot, la extracción de
-  documentos y para **redactar** la explicación de las alertas.
-- La póliza va **cacheada en el prompt** por defecto (`POLICY_MODE=cached`), así que no
-  requiere indexar. Para `rag`/`hybrid`: `python -m insurance_assistant.retrieval.ingest`.
-- El histórico usa datos **sintéticos** incluidos (`data/history/`), regenerables con
+### Notes for evaluators
+- **ChromaDB**: local by default (`CHROMA_MODE=local`); no account or credentials needed.
+- **Fraud detection does not depend on the model**: the flags and the decision are
+  deterministic code. The model (option A or B) is only used for the chatbot, document
+  extraction, and to **write** the explanation behind the alerts.
+- The policy is **cached in the prompt** by default (`POLICY_MODE=cached`), so no
+  indexing is required. For `rag`/`hybrid`: `python -m insurance_assistant.retrieval.ingest`.
+- The history uses included **synthetic** data (`data/history/`), regenerable with
   `python -m scripts.generate_history`.
 
-## Claims de ejemplo (demo)
+## Sample claims (demo)
 
-Sube estos en la pestaña "Revisar un claim" (`data/claims/`):
+Upload these in the "Review a claim" tab (`data/claims/`):
 
-| Archivo | Resultado | Qué demuestra |
+| File | Result | What it demonstrates |
 |---|---|---|
-| `claim_clean.json` | ✅ Auto-aprobar | claim consistente |
-| `claim_fraud.json` | 🔴 Rechazar | reglas de póliza (monto, médico pariente, beneficiario acusado…) |
-| `claim_history_anomaly.json` | 🔴 Rechazar | análisis histórico (beneficiario frecuente, outlier de monto) |
-| `claim_semantic.json` | 🟡 Revisión humana | narrativa semánticamente similar a un claim previo |
+| `claim_clean.json` | Auto-approve | consistent claim |
+| `claim_fraud.json` | Reject | policy rules (amount, related physician, accused beneficiary…) |
+| `claim_history_anomaly.json` | Reject | historical analysis (frequent beneficiary, amount outlier) |
+| `claim_semantic.json` | Manual review | narrative semantically similar to a previous claim |
 
-## Arquitectura
+## Architecture
 
-Un motor de contexto sobre la póliza alimenta el chatbot y el razonamiento de
-fraude. El pipeline del claim se orquesta con LangGraph:
+A context engine over the policy powers both the chatbot and the fraud reasoning.
+The claim pipeline is orchestrated with LangGraph:
 
 ```
 extract → validate → fraud_rules → historical_analysis → semantic_analysis
         → consolidate ─┬─(flags)→ reasoning → END
-                       └─(sin flags)→ auto_ok → END
+                       └─(no flags)→ auto_ok → END
 ```
 
-- **extract / reasoning** usan el LLM (leer el documento / explicar).
-- **fraud_rules / historical / semantic / consolidate** son código → el **veredicto
-  no se puede alucinar**.
+- **extract / reasoning** use the LLM (reading the document / explaining).
+- **fraud_rules / historical / semantic / consolidate** are code → the **verdict
+  can't be hallucinated**.
 
-Organización por capas (la UI solo habla con `application/`, `domain/` no depende
-de nada externo):
+Layered organization (the UI only talks to `application/`, `domain/` has no
+external dependencies):
 
 ```
 insurance_assistant/
-├── settings.py         Config tipada (Pydantic)
-├── domain/             Negocio puro: POLICY_FACTS, esquemas Pydantic
-├── llm/                Factory del modelo (Claude/Ollama) + prompt caching
-├── documents/          Carga de PDF/DOCX + extracción de claims
-├── retrieval/          ChromaDB (local/cloud), estrategias de contexto, narrativas
-├── fraud/              rules · anomaly · semantic · scoring · history
-├── agent/              Grafo de LangGraph
-└── application/        Casos de uso (chat_service, claim_service)
-app.py                  UI Streamlit
+├── settings.py         Typed config (Pydantic)
+├── domain/             Pure business logic: POLICY_FACTS, Pydantic schemas
+├── llm/                Model factory (Claude/Ollama) + prompt caching
+├── documents/          PDF/DOCX loading + claim extraction
+├── retrieval/          ChromaDB (local/cloud), context strategies, narratives
+├── fraud/               rules · anomaly · semantic · scoring · history
+├── agent/               LangGraph graph
+└── application/         Use cases (chat_service, claim_service)
+app.py                  Streamlit UI
 tests/                  pytest
 ```
 
-### Estrategia de contexto (`POLICY_MODE`)
+### Context strategy (`POLICY_MODE`)
 
-La póliza (~30K tokens) cabe en contexto, por eso hay tres modos intercambiables:
+The policy (~30K tokens) fits in context, so there are three interchangeable modes:
 
-| Modo | Cómo | Cuándo |
+| Mode | How | When |
 |---|---|---|
-| `cached` (def.) | póliza completa cacheada (prompt caching) | 1 póliza; máxima precisión |
-| `hybrid` | RAG selecciona páginas → carga las páginas completas | equilibrio; escala mejor |
-| `rag` | recupera chunks de ChromaDB | corpus grande |
+| `cached` (default) | full policy cached (prompt caching) | 1 policy; maximum accuracy |
+| `hybrid` | RAG selects pages → loads the full pages | balance; scales better |
+| `rag` | retrieves chunks from ChromaDB | large corpus |
 
-## Decisiones de diseño
+## Design decisions
 
-- **Reglas para el veredicto, LLM para leer/explicar.** El fraude se decide con
-  código determinístico (auditable, testeable, sin alucinación, inmune a inyección
-  en el documento); el LLM extrae datos y redacta el porqué.
-- **Estadística para números, embeddings para significado.** El histórico se compara
-  con z-scores/conteos; las narrativas similares, con embeddings (ChromaDB). La señal
-  semántica es **suave** (peso bajo → revisión, nunca rechazo por sí sola).
-- **CAG con caching** en vez de RAG para una póliza pequeña: más precisión sin
-  retrieval-miss; RAG/híbrido quedan para escalar.
-- **Patrones**: Strategy (modos de contexto), Factory/registro (proveedor LLM),
-  capas + SRP, Pydantic Settings.
+- **Rules for the verdict, LLM for reading/explaining.** Fraud is decided with
+  deterministic code (auditable, testable, hallucination-free, immune to document
+  injection); the LLM extracts data and writes the reasoning.
+- **Statistics for numbers, embeddings for meaning.** History is compared with
+  z-scores/counts; similar narratives, with embeddings (ChromaDB). The semantic
+  signal is **soft** (low weight → review, never a rejection on its own).
+- **CAG with caching** instead of RAG for a single small policy: more accuracy
+  with no retrieval-miss risk; RAG/hybrid remain available to scale.
+- **Patterns**: Strategy (context modes), Factory/registry (LLM provider),
+  layers + SRP, Pydantic Settings.
 
 ## Stack
 
-Python · Streamlit · LangGraph · Claude (Anthropic) vía `langchain-anthropic` ·
+Python · Streamlit · LangGraph · Claude (Anthropic) via `langchain-anthropic` ·
 ChromaDB · Pydantic · pytest.
