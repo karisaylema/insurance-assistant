@@ -1,5 +1,8 @@
 # Claims Assistant — Principal Life Insurance
 
+[![CI](https://github.com/karisaylema/insurance-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/karisaylema/insurance-assistant/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
 AI chatbot for life insurance, built on a **real policy document**
 (Principal Life, Group Policy GL S655). The brief allows combining its focus
 areas; this solution **covers all three**, with emphasis on 1 and 2:
@@ -9,6 +12,12 @@ areas; this solution **covers all three**, with emphasis on 1 and 2:
 | **1** | Claims Processor | Extracts data from uploaded claims (PDF/DOCX/JSON), validates and flags missing fields |
 | **2** | Fraud Detection | Detects fraud across 3 layers and **explains** each alert citing its source |
 | **3** | Policy Manager | Chatbot that answers questions about terms, coverage and exclusions |
+
+## Demo
+
+Reviewing `claim_fraud.json`: the rules reject it and the LLM only writes the explanation, citing the violated clauses.
+
+![Claim review: reject decision with cited fraud flags](docs/claim_fraud_result.png)
 
 ## Features
 
@@ -94,10 +103,15 @@ Upload these in the "Review a claim" tab (`data/claims/`):
 A context engine over the policy powers both the chatbot and the fraud reasoning.
 The claim pipeline is orchestrated with LangGraph:
 
-```
-extract → validate → fraud_rules → historical_analysis → semantic_analysis
-        → consolidate ─┬─(flags)→ reasoning → END
-                       └─(no flags)→ auto_ok → END
+```mermaid
+flowchart LR
+    A[extract<br/>LLM] --> B[validate]
+    B --> C[fraud_rules<br/>code]
+    C --> D[historical_analysis<br/>code]
+    D --> E[semantic_analysis<br/>embeddings]
+    E --> F{consolidate<br/>code}
+    F -- flags --> G[reasoning<br/>LLM explains] --> H([END])
+    F -- no flags --> I[auto_ok] --> H
 ```
 
 - **extract / reasoning** use the LLM (reading the document / explaining).

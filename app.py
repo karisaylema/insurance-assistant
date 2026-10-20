@@ -15,6 +15,11 @@ from insurance_assistant.settings import settings
 
 st.set_page_config(page_title="Principal Life — Asistente de Claims", layout="wide")
 
+def _no_latex(text: str) -> str:
+    """Streamlit renders $...$ as LaTeX; escape it so dollar amounts show as text."""
+    return (text or "").replace("$", r"\$")
+
+
 DECISION_LABEL = {
     "auto_approve": "Auto-aprobar",
     "manual_review": "Revisión humana",
@@ -84,7 +89,7 @@ with tab_chat:
         with st.chat_message("user"):
             st.markdown(ex["question"])
         with st.chat_message("assistant"):
-            st.markdown(ex["answer"])
+            st.markdown(_no_latex(ex["answer"]))
             u = ex.get("usage", {})
             if u:
                 st.caption(
@@ -118,13 +123,13 @@ with tab_claim:
         c3.metric("Riesgo", assessment.risk_level.upper())
 
         st.markdown("#### Explicación")
-        st.info(assessment.explanation or "—")
+        st.info(_no_latex(assessment.explanation) or "—")
 
         if assessment.flags:
             st.markdown("#### Flags de fraude")
             for f in assessment.flags:
                 with st.container(border=True):
-                    st.markdown(f"**[{f.severity.upper()}] {f.rule}** — {f.detail}")
+                    st.markdown(f"**[{f.severity.upper()}] {f.rule}** — {_no_latex(f.detail)}")
                     st.caption(f"Cláusula: {f.clause}")
         else:
             st.success("Sin flags de fraude.")
